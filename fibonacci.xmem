@@ -1,0 +1,187 @@
+# header data
+$byte_encoding=02
+$total_size=0fff # 4095 shorts
+
+# CPU address startup
+@at=19
+# ask use a number, and calculate the nth fibonacci number
+
+# === ask user input ===
+# push -1 to STACK to known end of stack
+8020 ffff 0b # push -1 to STACK
+
+# move IN to R0
+0020 0c 00
+# if eq 0 (no input) go back to start
+8020 1c 03 # move 1c to R3
+4010 00 00 # jump R0 == 0
+
+# jump if it's a new line (end of input)
+8020 3c 03 # move 3c to R3
+4010 00 0a # jump R0 == 10 ('\n')
+
+# if not a number, jump to log error
+8020 c8 03 # move c8 to R3
+4011 00 30 # jump R0 < 48 ('0')
+4013 00 39 # jump R0 > 57 ('9')
+
+# move to stack and read next
+0020 00 0b # push R0 to STACK
+8020 1c 08 # goto 1c
+
+@at=3C
+# == atoi input ==
+# set power
+8020 01 02 # move 1 to R2
+# set accumulator
+0020 0b 01 # pop STACK to R1
+# shift ASCII value to numeric
+4002 01 30 # subs R1 - 48 (ex: '3' -> 3)
+0020 04 01 # move ACC0 to R1
+
+# store loop break addr
+8020 6F 03 # move 6F to R3
+
+# start loop 0x4B
+# get last number
+0020 0b 00 # pop STACK to R0
+# if -1 then break the loop
+4010 00 ffff # jump R0 == -1
+
+# shift ASCII value to numeric
+4002 00 30 # subs R0 - 48 (ex: '3' -> 3)
+0020 04 00 # move ACC0 to R0
+
+# multiply X * (10 * power)
+4004 02 0a # mult R2 * 10 = compute current power
+0020 04 02 # move ACC0 to R2 = move back power to its variable
+0004 00 02 # mult R0 * R2 = mult X by power
+0001 04 01 # add ACC0 + R1 = add previous parsed X to current X
+0020 04 01 # move ACC0 to R1 = set current X as previous X
+4001 02 01 # add R2 + 1 = increase power
+0020 04 02 # move ACC0 to R2 = move back power to its variable
+8020 4B 08 # goto 4B (head of loop)
+
+# push return value to the stack
+8020 019c 0b # push 019c to STACK
+# go to fibonacci
+8020 012c 08 # goto 012c
+
+@at=C8
+# === empty stack & log error ===
+# empty stack
+0020 0b 02 # pop STACK to R2
+8020 d4 03 # move d4 to R3
+4010 02 ffff # jump R2 == -1
+8020 c8 08 # goto c8 (head of loop)
+
+# move 'B' to OUT
+8020 42 0d
+# move 'a' to OUT
+8020 61 0d
+# move 'd' to OUT
+8020 64 0d
+# move ' ' to OUT
+8020 20 0d
+# move 'i' to OUT
+8020 69 0d
+# move 'n' to OUT
+8020 6e 0d
+# move 'p' to OUT
+8020 70 0d
+# move 'u' to OUT
+8020 75 0d
+# move 't' to OUT
+8020 74 0d
+# move ' ' to OUT
+8020 20 0d
+# move input to OUT
+0020 00 0d
+# move '\n to OUT
+8020 0a 0d
+
+# move PRINT_SIG to OUT
+8020 00 0d
+
+8020 19 08 # goto 19
+
+@at=012c
+# === fibonacci ===
+
+# if R1 == 0 push 0
+# if R1 == 1 || 2 push 1
+8020 0168 03 # move 0168 to R3
+4012 01 00 # jump R1 <= 0
+8020 0171 03 # move 0171 to R3
+4012 01 02 # jump R1 <= 2
+
+# else add the return of the 2 recursive calls
+# CALL 1
+# decrease R1 and put it in R0
+4002 01 01 # subst R1 - 1
+0020 04 01 # move ACCU0 to R1
+0020 01 0b # push R1 to STACK
+# before calling fibonacci recursively, push onto the stack where it should return
+8020 0147 0b # push 0147 to STACK
+8020 012c 08 # goto fibonacci
+
+# CALL 2
+0020 0b 00 # pop STACK (result) to R0
+0020 0b 01 # pop STACK to R1
+0020 00 0b # push R0 (result) to STACK
+4002 01 01 # subst R1 - 1
+0020 04 01 # move ACCU0 to R1
+# before calling fibonacci recursively, push onto the stack where it should return
+8020 015C 0b # push 015C to STACK
+8020 012c 08 # goto fibonacci
+
+# add the two top stack values
+0001 0b 0b # add *STACK + (*STACK - 1)
+0020 0b 03 # pop STACK (return addr) to R3
+0020 04 0b # push ACCU0 (result) to STACK
+0020 03 08 # goto *R3
+
+# if <= 0
+# store return address to R3
+0020 0b 03 # pop STACK to R3
+8020 00 0b # push 0 to STACK
+0020 03 08 # goto *R3
+
+# if <= 2
+# store return address to R3
+0020 0b 03 # pop STACK to R3
+8020 01 0b # push 1 to STACK
+0020 03 08 # goto *R3
+
+@at=019c
+# === print result ===
+# store end of loop addr to R3
+8020 01B1 03 # mov 01B1 to R3
+
+# store number to ACC0
+0020 0b 04 # pop STACK to ACC0
+
+# set stack delimiter
+8020 ffff 0b # push -1 to STACK
+
+# start loop 0x1A5
+4003 04 0a # divide ACC0 / 10
+0020 05 0b # push remainder to STACK
+4010 04 00 # jump quotient == 0
+8020 01A5 08 # goto 01A5
+
+# store end of loop addr to R3
+8020 01C3 03 # mov 01C3 to R3
+
+# start loop 0x1B3
+0020 0b 00 # pop STACK to R0
+# if end of stack
+4010 00 ffff # jump R0 == -1
+4001 00 30 # add R0 + 48 = shift from int to ASCII value
+0020 04 0d # move ACC0 to OUT
+8020 01B4 08 # goto 01B4
+
+8020 0a 0d # send '\n' to OUT
+8020 00 0d # send PRINT_SIG to OUT
+8020 19 08 # goto 19
+

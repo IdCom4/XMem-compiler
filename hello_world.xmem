@@ -1,0 +1,39 @@
+# header data
+$byte_encoding=02
+$total_size=0fff # 4095 shorts
+
+# CPU address startup
+@at=19
+# print "Hello world !"
+
+# move 'H' to OUT
+8020 48 0d
+# move 'e' to OUT
+8020 65 0d
+# move 'l' to OUT
+8020 6c 0d
+# move 'l' to OUT
+8020 6c 0d
+# move 'o' to OUT
+8020 6f 0d
+# move ' ' to OUT
+8020 20 0d
+# move 'w' to OUT
+8020 77 0d
+# move 'o' to OUT
+8020 6f 0d
+# move 'r' to OUT
+8020 72 0d
+# move 'l' to OUT
+8020 6c 0d
+# move 'd' to OUT
+8020 64 0d
+# move ' ' to OUT
+8020 20 0d
+# move '!' to OUT
+8020 21 0d
+
+# move PRINT_SIG to OUT
+8020 00 0d
+
+
