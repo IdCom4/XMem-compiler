@@ -1,4 +1,4 @@
-
+*.mem
 
 sh_build/
 sh_out/
