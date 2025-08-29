@@ -92,8 +92,6 @@ The **XMem** compiler supports several options:
 
 - `-o=<output_file_name>` – output file name
 
-It outputs a xmem file, that can itself be compiled using the [XMem compiler](https://github.com/IdCom4/Xmem-compiler) to the final binary file
-
 ---
 
 ## Usage
